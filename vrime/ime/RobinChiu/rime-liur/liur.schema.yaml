@@ -76,6 +76,8 @@ key_binder:
     - {accept: "Control+Shift+numbersign", toggle: full_shape, when: always}
     - {accept: "Control+Shift+dollar", toggle: simplification, when: always}
     - {accept: "Control+Shift+percent", toggle: extended_charset, when: always}
+    - {accept: period, send: period, when: has_menu}
+    - {accept: comma, send: comma, when: has_menu}
   import_preset: default
 liu_w2c:
   opencc_config: liu_w2c.json

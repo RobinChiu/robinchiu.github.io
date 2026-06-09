@@ -157,14 +157,15 @@ schema:
     碼表源自倉頡之友發佈的《五倉世紀版》
     www.chinesecj.com
     快打模式：
-      - 取消連打
+      - 僅限基礎單字，減少重碼
+      - 取消詞兒連打
       - 無重碼自動上屏，有重碼頂字上屏
       - 取消 , . 翻頁
       - 取消拼音混打
 
   name: "倉頡五代·快打模式"
   schema_id: cangjie5_express
-  version: 2018.04.14
+  version: 2026.05.08
 simplifier:
   tips: all
 speller:
@@ -172,21 +173,20 @@ speller:
   auto_select: true
   delimiter: " "
 switches:
-  - name: ascii_mode
+  - abbrev: ["中", "Ａ"]
+    name: ascii_mode
     reset: 0
     states: ["中文", "西文"]
   - name: full_shape
     states: ["半角", "全角"]
   - name: simplification
     states: ["漢字", "汉字"]
-  - name: extended_charset
-    states: ["常用", "增廣"]
   - name: ascii_punct
     states: ["。，", "．，"]
 translator:
   comment_format:
     - "xlit|abcdefghijklmnopqrstuvwxyz~|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜符～|"
-  dictionary: cangjie5
+  dictionary: cangjie5_char
   disable_user_dict_for_patterns:
     - "^z.*$"
     - "^yyy.*$"

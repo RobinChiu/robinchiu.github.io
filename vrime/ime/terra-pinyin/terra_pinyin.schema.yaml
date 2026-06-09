@@ -222,7 +222,8 @@ speller:
   finals: "-;/<,\\."
   initials: zyxwvutsrqponmlkjihgfedcba
 switches:
-  - name: ascii_mode
+  - abbrev: ["中", "Ａ"]
+    name: ascii_mode
     reset: 0
     states: ["中文", "西文"]
   - name: full_shape

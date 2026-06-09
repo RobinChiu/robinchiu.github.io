@@ -14,6 +14,7 @@ editor:
 engine:
   filters:
     - "simplifier@zh_hans"
+    - "simplifier@zh_hant_hk"
     - "simplifier@zh_hant_tw"
     - uniquifier
   processors:
@@ -81,6 +82,8 @@ key_binder:
     - {accept: "Shift+asterisk", send: KP_8, when: has_menu}
     - {accept: "Shift+parenleft", send: KP_9, when: has_menu}
     - {accept: "Shift+parenright", send: KP_0, when: has_menu}
+    - {accept: "Control+Shift+4", toggle: zh_hans, when: always}
+    - {accept: "Control+Shift+dollar", toggle: zh_hans, when: always}
   import_preset: default
 menu:
   alternative_select_labels:
@@ -201,6 +204,7 @@ schema:
     - stroke
   description: |
     注音符號輸入，採用「大千式」鍵盤排列。
+    支持亂序輸入音節內的各個注音符號（聲調除外）。
 
     本方案採用「無模式」設計，以 Shift+數字鍵選字，
     或以 Tab、方向鍵切換候選字，回車鍵上屏。
@@ -249,13 +253,17 @@ speller:
   initials: "1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-"
   use_space: true
 switches:
-  - name: ascii_mode
+  - abbrev: ["中", "Ａ"]
+    name: ascii_mode
     reset: 0
     states: ["中文", "西文"]
   - name: full_shape
     states: ["半角", "全角"]
-  - options: [zh_hant, zh_hans, zh_hant_tw]
-    states: ["傳統漢字", "简化字", "臺灣字形"]
+  - abbrev: ["漢", "简", "港", "臺"]
+    options: [zh_hant, zh_hans, zh_hant_hk, zh_hant_tw]
+    states: ["傳統漢字", "简化字", "香港字形", "臺灣字形"]
+  - name: ascii_punct
+    states: ["。，", "．，"]
 translator:
   dictionary: terra_pinyin
   preedit_format:
@@ -267,6 +275,12 @@ zh_hans:
   opencc_config: t2s.json
   option_name: zh_hans
   tips: all
+zh_hant_hk:
+  excluded_types:
+    - reverse_lookup
+  opencc_config: t2hk.json
+  option_name: zh_hant_hk
+  tips: none
 zh_hant_tw:
   excluded_types:
     - reverse_lookup
