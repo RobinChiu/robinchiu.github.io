@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dragon English 100 · 發音練習</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#fff; --text:#1a1d21; --muted:#6b7280;
+    --line:#e5e7eb; --accent:#2563eb; --accent-soft:#eff4ff;
+    --ok:#16a34a; --warn:#b45309; --bad:#dc2626; --shadow:0 1px 3px rgba(0,0,0,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#111418; --card:#1a1e24; --text:#e8eaed; --muted:#9aa3ad;
+           --line:#2a3038; --accent:#60a5fa; --accent-soft:#1b2735; --ok:#4ade80;
+           --warn:#fbbf24; --bad:#f87171; --shadow:0 1px 3px rgba(0,0,0,.4); }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",
+                 "Hiragino Sans","Microsoft JhengHei",sans-serif;
+    line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:0 16px 80px}
+
+  /* ---------- header ---------- */
+  header{padding:26px 0 14px}
+  h1{font-size:22px;margin:0 0 4px;letter-spacing:.2px}
+  .sub{font-size:13px;color:var(--muted)}
+  .sub a{color:var(--accent);text-decoration:none}
+  .sub a:hover{text-decoration:underline}
+
+  /* ---------- toolbar ---------- */
+  .bar{
+    position:sticky;top:0;z-index:30;background:var(--bg);
+    padding:10px 0;border-bottom:1px solid var(--line);
+    display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+  }
+  .bar input[type=search]{
+    flex:1 1 190px;min-width:150px;padding:7px 11px;font-size:14px;
+    border:1px solid var(--line);border-radius:8px;background:var(--card);
+    color:var(--text);outline:none;
+  }
+  .bar input[type=search]:focus{border-color:var(--accent)}
+  button,select{
+    font:inherit;font-size:13px;color:var(--text);background:var(--card);
+    border:1px solid var(--line);border-radius:8px;padding:7px 11px;cursor:pointer;
+  }
+  button:hover,select:hover{border-color:var(--accent)}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  button.primary:hover{filter:brightness(1.08)}
+  button.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .progress-label{font-size:13px;color:var(--muted);margin-left:auto;white-space:nowrap}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;
+       overflow:hidden;background:var(--card);flex:0 0 auto}
+  .seg button{border:0;border-radius:0;padding:7px 11px;background:transparent}
+  .seg button + button{border-left:1px solid var(--line)}
+  .seg button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  button.danger{color:var(--bad);border-color:color-mix(in srgb, var(--bad) 45%, var(--line))}
+  button.danger:hover{border-color:var(--bad);background:color-mix(in srgb, var(--bad) 10%, transparent)}
+  button.danger.armed{background:var(--bad);border-color:var(--bad);color:#fff}
+
+  /* ---------- player ---------- */
+  .player{
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    box-shadow:var(--shadow);margin:16px 0;overflow:hidden;
+  }
+  .top{display:flex;align-items:stretch}
+  .player .video{position:relative;flex:0 0 340px;height:191px;background:#000}
+  .player .video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .video-note{
+    position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+    text-align:center;padding:18px;color:#e5e7eb;background:#111;
+    font-size:14px;line-height:1.6;
+  }
+  .now{flex:1 1 auto;min-width:0;padding:14px 16px}
+  .now .en{font-size:17px;font-weight:600;margin:0 0 4px}
+  .now .zh{font-size:14px;color:var(--muted);margin:0}
+  .now .meta{font-size:12px;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums}
+  .transport{display:flex;gap:8px;flex-wrap:wrap;padding:0 16px 14px;align-items:center}
+  .seekbar{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin:0 16px 14px}
+  .seekbar > i{display:block;height:100%;width:0;background:var(--accent);transition:width .15s linear}
+  .hint{font-size:12px;color:var(--muted);padding:0 16px 12px}
+  .hint kbd{
+    font:inherit;font-size:11px;background:var(--bg);border:1px solid var(--line);
+    border-radius:4px;padding:1px 5px;
+  }
+  .status{
+    display:none;gap:8px;flex-wrap:wrap;align-items:center;
+    background:color-mix(in srgb, var(--warn) 12%, transparent);
+    border-top:1px solid var(--line);padding:10px 16px;font-size:13px;
+  }
+  .status.show{display:flex}
+  .status .msg{flex:1 1 240px;color:var(--text)}
+  .status a{color:var(--accent);text-decoration:none}
+  .status a:hover{text-decoration:underline}
+  .status button{padding:5px 9px;font-size:12.5px}
+
+  /* ---------- list ---------- */
+  ul.list{list-style:none;margin:0;padding:0}
+  li.item{
+    display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;
+    background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:11px 13px;margin:8px 0;cursor:pointer;
+    transition:border-color .12s, background .12s, opacity .12s;
+  }
+  li.item:hover{border-color:var(--accent)}
+  li.item.current{border-color:var(--accent);background:var(--accent-soft);
+    box-shadow:0 0 0 1px var(--accent) inset}
+  li.item.done .en{color:var(--muted)}
+  li.item.done{opacity:.72}
+  .num{
+    flex:0 0 auto;width:34px;height:24px;border-radius:6px;background:var(--bg);
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums;
+  }
+  li.item.current .num{background:var(--accent);color:#fff}
+  .body{flex:1 1 auto;min-width:0}
+  .en{font-size:15.5px;font-weight:550;margin:0 0 3px;word-break:break-word}
+  .zh{font-size:13.5px;color:var(--muted);margin:0;word-break:break-word}
+  .side{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+  .time{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .check{
+    font-size:11px;border:1px solid var(--line);border-radius:20px;
+    padding:2px 8px;color:var(--muted);background:transparent;cursor:pointer;user-select:none;
+  }
+  li.item.done .check{background:var(--ok);border-color:var(--ok);color:#fff}
+  .dcheck{
+    font-size:11px;border:1px dashed var(--line);border-radius:20px;
+    padding:2px 8px;color:var(--muted);background:transparent;cursor:pointer;user-select:none;
+  }
+  .dcheck:hover{border-color:var(--accent);color:var(--accent)}
+  .dcheck.on{background:var(--accent);border:1px solid var(--accent);color:#fff}
+  li.item.drilling{border-color:var(--accent)}
+  .en.masked{color:var(--muted);font-weight:500;letter-spacing:.4px}
+
+  /* ---------- dictation drill ---------- */
+  .drill{
+    flex:0 0 100%;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);
+    display:flex;flex-direction:column;gap:8px;cursor:default;
+  }
+  .drill-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12.5px}
+  .drill-head .dz{flex:1 1 220px;min-width:0;font-size:13.5px;color:var(--text);
+                  word-break:break-word}
+  .drill-head .wc{color:var(--muted);white-space:nowrap}
+  .drill textarea{
+    width:100%;font:inherit;font-size:15.5px;padding:9px 11px;resize:vertical;
+    border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);
+    outline:none;line-height:1.5;
+  }
+  .drill textarea:focus{border-color:var(--accent)}
+  .drill-foot{font-size:12px;color:var(--muted)}
+  .drill-result{
+    font-size:14px;line-height:1.65;padding:10px 12px;border:1px solid var(--line);
+    border-radius:8px;background:var(--bg);
+  }
+  .drill-result.ok{
+    border-color:var(--ok);font-weight:600;color:var(--ok);
+    background:color-mix(in srgb, var(--ok) 12%, transparent);
+  }
+  .legend{font-size:11.5px;color:var(--muted);margin-bottom:4px}
+  .diff{font-size:15.5px;line-height:1.9;word-break:break-word;margin-bottom:8px}
+  .d-ok{color:var(--text)}
+  .d-miss{color:var(--bad);text-decoration:line-through;opacity:.8}
+  .d-extra{color:var(--bad);background:color-mix(in srgb, var(--bad) 18%, transparent);
+           border-radius:3px;padding:0 3px}
+  .ans{font-size:13.5px;word-break:break-word;margin-top:4px}
+  .ans .lab{color:var(--muted)}
+  .ans-en{font-weight:600}
+  .ans-zh{font-size:13px;color:var(--muted);margin-top:3px;word-break:break-word}
+  .drill-result .again{margin-top:8px}
+  .empty{color:var(--muted);font-size:14px;padding:24px 4px;text-align:center}
+  footer{font-size:12px;color:var(--muted);text-align:center;padding:26px 0 0}
+  @media (max-width:640px){
+    .top{flex-direction:column}
+    .player .video{flex:none;width:100%;height:auto;padding-top:56.25%}
+    .now .en{font-size:15.5px}
+    .en{font-size:14.5px}
+    .bar{gap:6px}
+    .progress-label{margin-left:0}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Dragon English 100 · 發音練習</h1>
+    <div class="sub">竹岡廣信《Dragon English 基本英文 100》全 100 句，
+      音源為 YouTube 逐句朗讀影片（17:21）：
+      <a href="https://www.youtube.com/watch?v=SAPl2dIV0oA" target="_blank" rel="noopener">英検道Channel</a>
+    </div>
+  </header>
+
+  <div class="bar">
+    <input type="search" id="q" placeholder="搜尋英文 / 中文 / 編號…" autocomplete="off">
+    <select id="filter" title="篩選">
+      <option value="all">全部</option>
+      <option value="todo">未聽</option>
+      <option value="done">已聽</option>
+    </select>
+    <div class="seg" role="group" aria-label="練習模式">
+      <button id="drillRead" class="on" title="聽讀：點句子播放">聽讀</button>
+      <button id="drillWrite" title="默寫：聽音後打出這句英文">默寫</button>
+    </div>
+    <button id="repeatBtn" title="單句重複次數">重複 ×1</button>
+    <select id="speed" title="播放速度">
+      <option value="0.75">0.75×</option>
+      <option value="1" selected>1×</option>
+      <option value="1.25">1.25×</option>
+      <option value="1.5">1.5×</option>
+    </select>
+    <button id="playAllBtn" class="primary">▶ 連續播放</button>
+    <button id="resetBtn" class="danger"
+            title="清除「已聽」與「已默寫」進度（播放設定會保留）">重設</button>
+    <span class="progress-label" id="progress">已聽 0 / 100</span>
+  </div>
+
+  <div class="player">
+    <div class="top">
+      <div class="video">
+        <div id="ytbox"><div id="yt"></div></div>
+        <div class="video-note" id="videoNote"></div>
+      </div>
+      <div class="now">
+        <p class="en" id="nowEn">點下面任何一句開始播放</p>
+        <p class="zh" id="nowZh">選擇句子後會跳到影片中該句的時間點</p>
+        <div class="meta" id="nowMeta"></div>
+      </div>
+    </div>
+    <div class="seekbar"><i id="seekFill"></i></div>
+    <div class="transport">
+      <button id="prevBtn" title="上一句 (↑)">◀ 上一句</button>
+      <button id="replayBtn" title="重播這一句 (R)">↺ 重播</button>
+      <button id="nextBtn" title="下一句 (↓)">下一句 ▶</button>
+      <button id="stopBtn" title="停止 (Esc)">■ 停止</button>
+      <span class="hint" style="padding:0" id="modeLabel"></span>
+    </div>
+    <div class="hint">
+      快捷鍵：<kbd>Space</kbd> 播放／暫停 · <kbd>↑</kbd><kbd>↓</kbd> 換句 ·
+      <kbd>R</kbd> 重播 · <kbd>Esc</kbd> 停止 · 點句子即可播放
+      · 切到「默寫」可練聽打（Enter 送出）
+    </div>
+    <div class="status" id="status">
+      <span class="msg" id="statusMsg"></span>
+      <button id="retryApi">重試 YouTube 播放器</button>
+      <button id="useEmbed">改用備援播放器</button>
+      <button id="useTts">改用離線朗讀</button>
+      <a href="#" id="openYt">在 YouTube 開啟</a>
+    </div>
+  </div>
+
+  <ul class="list" id="list"></ul>
+  <div class="empty" id="empty" style="display:none">沒有符合的句子</div>
+
+  <footer>句子原文取自公開 PDF、時間軸由影片自動字幕與音檔能量分析校正 · 僅供個人學習使用</footer>
+</div>
+
+<script>
+const VIDEO_ID = "SAPl2dIV0oA";
+const DATA = [
+ {
+  "n": 1,
+  "en": "It would be dangerous to drink two bottles of whiskey and drive a car.",
+  "zh": "一口氣喝掉兩瓶威士忌再開車，是很危險的。",
+  "start": 0.06,
+  "end": 4.28
+ },
+ {
+  "n": 2,
+  "en": "It is very dangerous to cross a busy street before the light turns green.",
+  "zh": "趁紅燈還沒轉綠就穿越車水馬龍的馬路，非常危險。",
+  "start": 8.7,
+  "end": 13.04
+ },
+ {
+  "n": 3,
+  "en": "It is really pleasant to take a walk early in the morning, listening to birds sing.",
+  "zh": "清晨一邊聽著鳥鳴一邊散步，真的很舒服。",
+  "start": 17.46,
+  "end": 21.92
+ },
+ {
+  "n": 4,
+  "en": "Most Japanese high school students go to a cram school to prepare for college entrance exam.",
+  "zh": "日本的高中生大多為了準備大學入學考試而上補習班。",
+  "start": 26.4,
+  "end": 31.82
+ },
+ {
+  "n": 5,
+  "en": "When waiting for the elevator to come or the traffic light to change, most Japanese people become irritated in only thirty seconds.",
+  "zh": "日本人在等電梯或等紅燈時，短短三十秒就開始煩躁。",
+  "start": 36.48,
+  "end": 44.18
+ },
+ {
+  "n": 6,
+  "en": "An elderly woman sitting next to me on the train asked me where I was going.",
+  "zh": "在電車上坐我旁邊的老太太問我要坐到哪裡。",
+  "start": 48.78,
+  "end": 52.82
+ },
+ {
+  "n": 7,
+  "en": "Tom told us that we should rent a car to get around the city because the public transportation was inconvenient.",
+  "zh": "湯姆說：大眾運輸不太方便，不如租輛車在城裡到處逛逛如何。",
+  "start": 57.3,
+  "end": 63.02
+ },
+ {
+  "n": 8,
+  "en": "Everyone should be free to decide when to get married and whether to have children.",
+  "zh": "何時結婚、要不要生小孩，都應該由個人自由決定。",
+  "start": 67.86,
+  "end": 72.2
+ },
+ {
+  "n": 9,
+  "en": "It is impossible to predict where and when there will be a major earthquake.",
+  "zh": "大地震會在何時、何地發生，是無法預測的。",
+  "start": 76.68,
+  "end": 80.48
+ },
+ {
+  "n": 10,
+  "en": "Tom insisted that everything would be all right, but I couldn’t help feeling worried.",
+  "zh": "湯姆堅持一切都會順利，但我還是擔心得不得了。",
+  "start": 85.32,
+  "end": 89.72
+ },
+ {
+  "n": 11,
+  "en": "It never occurred to me that my remark might hurt her feelings.",
+  "zh": "我從沒想過自己的話會傷到她。",
+  "start": 94.32,
+  "end": 98.0
+ },
+ {
+  "n": 12,
+  "en": "“Tom, dinner is ready.” “OK, Mom. I’m coming.”",
+  "zh": "「湯姆，吃飯了。」「知道了，馬上來。」",
+  "start": 102.66,
+  "end": 116.12
+ },
+ {
+  "n": 13,
+  "en": "I’ll call you when I get to Narita Airport.",
+  "zh": "我到了成田機場就打電話給你。",
+  "start": 116.7,
+  "end": 119.06
+ },
+ {
+  "n": 14,
+  "en": "If you take the train to Tokyo Disneyland from here, you have to change three times.",
+  "zh": "從這裡搭電車去東京迪士尼樂園，必須換車三次。",
+  "start": 123.6,
+  "end": 128.42
+ },
+ {
+  "n": 15,
+  "en": "I’ve decided to look for a job abroad when I graduate from college.",
+  "zh": "我已經決定大學畢業後到海外找工作。",
+  "start": 133.08,
+  "end": 136.88
+ },
+ {
+  "n": 16,
+  "en": "This dryer doesn’t work. Something seems to be wrong with it.",
+  "zh": "這台吹風機不動了，好像壞掉了。",
+  "start": 141.54,
+  "end": 150.08
+ },
+ {
+  "n": 17,
+  "en": "The best thing about my stay with an American family was that parents treated me just like their daughter.",
+  "zh": "在美國寄宿家庭的那段日子，最讓我高興的是，接待家庭的父母待我就像親生女兒一樣。",
+  "start": 150.42,
+  "end": 155.96
+ },
+ {
+  "n": 18,
+  "en": "I lived in Canada for three years when I was in my teens because my father was transferred there.",
+  "zh": "十幾歲時因為父親工作的關係，我曾在加拿大住了三年。",
+  "start": 160.38,
+  "end": 165.92
+ },
+ {
+  "n": 19,
+  "en": "The internet is widely used, so sales of personal computers have been rapidly increasing over the last few years.",
+  "zh": "隨著網路的普及，這幾年個人電腦的銷量快速成長。",
+  "start": 170.22,
+  "end": 177.08
+ },
+ {
+  "n": 20,
+  "en": "I’ve often heard Tom boast that he is very good at swimming, but I’ve never actually seen him swim.",
+  "zh": "我常聽說湯姆游泳很厲害，卻從沒見過他游泳的樣子。",
+  "start": 181.68,
+  "end": 187.4
+ },
+ {
+  "n": 21,
+  "en": "It has been only a week since I began a part-time job at a convenience store, but I’m already used to it.",
+  "zh": "在便利商店打工才一週，我已經完全上手了。",
+  "start": 191.88,
+  "end": 197.96
+ },
+ {
+  "n": 22,
+  "en": "When I got on the train this morning, I couldn’t find an empty seat.",
+  "zh": "今天早上上車時，我找不到空位。",
+  "start": 202.2,
+  "end": 206.06
+ },
+ {
+  "n": 23,
+  "en": "I’m not wearing glasses now, so I can’t make out what the sign says.",
+  "zh": "我現在沒戴眼鏡，看不清那塊告示牌上寫什麼。",
+  "start": 206.64,
+  "end": 210.8
+ },
+ {
+  "n": 24,
+  "en": "Less than twenty-four hours after I return to my hometown, without realizing it, I start to talk in the local dialect.",
+  "zh": "我一回到故鄉，不到二十四小時就會自然而然說起家鄉話。",
+  "start": 215.52,
+  "end": 222.26
+ },
+ {
+  "n": 25,
+  "en": "Humans learn to express what they think by the age of five or six.",
+  "zh": "人類到了五六歲左右，就具備表達自己想法的能力。",
+  "start": 227.1,
+  "end": 230.78
+ },
+ {
+  "n": 26,
+  "en": "Thanks to the map you drew me the other day, I managed to get here without getting lost.",
+  "zh": "多虧你前幾天畫給我的地圖，我才能沒有迷路地來到這裡。",
+  "start": 230.88,
+  "end": 240.14
+ },
+ {
+  "n": 27,
+  "en": "Last summer I took two weeks off, and went on a trip to Europe with my wife.",
+  "zh": "去年夏天我請了兩週假，和太太一起去歐洲旅行。",
+  "start": 240.24,
+  "end": 250.22
+ },
+ {
+  "n": 28,
+  "en": "Bob had changed a lot, so when I saw him at a class reunion, I didn’t recognize him.",
+  "zh": "鮑伯變了很多，上次同學會見面時我沒認出他來。",
+  "start": 254.7,
+  "end": 260.18
+ },
+ {
+  "n": 29,
+  "en": "When I visited my hometown for the first time in twenty years, I found that it was no longer what it used to be.",
+  "zh": "二十年沒回去的故鄉已經完全變了樣，不見昔日的影子。",
+  "start": 264.6,
+  "end": 271.04
+ },
+ {
+  "n": 30,
+  "en": "I stayed up till four last night preparing for the math lesson, so I feel very sleepy.",
+  "zh": "昨晚忙著預習數學，熬到四點才睡，現在非常困。",
+  "start": 275.34,
+  "end": 280.58
+ },
+ {
+  "n": 31,
+  "en": "I’ve finished reading the novel I borrowed from the library yesterday, so now I have nothing to do.",
+  "zh": "昨天從圖書館借的小說已經看完，現在沒事可做。",
+  "start": 285.12,
+  "end": 290.9
+ },
+ {
+  "n": 32,
+  "en": "If you had taken this medicine and stayed in bed, you would probably have got well in two or three days.",
+  "zh": "要是你當時吃了藥、躺在床上休息，大概兩三天就會好了。",
+  "start": 295.38,
+  "end": 300.98
+ },
+ {
+  "n": 33,
+  "en": "The teacher says that we should wait here for a while because if we left now, we might get caught in a thunderstorm on the way.",
+  "zh": "老師說我們最好在這裡再等一會兒，因為現在出發的話，路上可能會遇上雷雨。",
+  "start": 305.52,
+  "end": 317.72
+ },
+ {
+  "n": 34,
+  "en": "People wish they could live forever and never become older. However, if this wish came true, there would be too many people on the earth.",
+  "zh": "人們總希望自己長生不老、永不衰老。然而這個願望若成真，地球上就會人滿為患。",
+  "start": 318.18,
+  "end": 335.84
+ },
+ {
+  "n": 35,
+  "en": "Ann looks happy. Something good must have happened to her.",
+  "zh": "安看起來很開心，一定是遇到什麼好事了。",
+  "start": 336.36,
+  "end": 340.58
+ },
+ {
+  "n": 36,
+  "en": "If you have been to old European cities, you must have been impressed by the beautiful streets.",
+  "zh": "如果你去過歐洲的古城，一定曾為那美麗的街景所感動。",
+  "start": 344.76,
+  "end": 349.58
+ },
+ {
+  "n": 37,
+  "en": "Without fossil fuels such as oil and coal, the history of the 20th century would have been completely different.",
+  "zh": "如果沒有石油、煤炭這類化石燃料，二十世紀的歷史一定截然不同。",
+  "start": 354.36,
+  "end": 360.8
+ },
+ {
+  "n": 38,
+  "en": "Some students coming to the library act as if they are in a coffee shop.",
+  "zh": "有些來圖書館的學生，舉止彷彿自己身在咖啡館。",
+  "start": 365.46,
+  "end": 369.62
+ },
+ {
+  "n": 39,
+  "en": "When I was a child, I often wished my house were a little larger.",
+  "zh": "小時候我常想，家裡要是再大一點就好了。",
+  "start": 374.1,
+  "end": 378.08
+ },
+ {
+  "n": 40,
+  "en": "I’d like to work as a volunteer helping victims of natural disasters, such as floods or earthquakes.",
+  "zh": "我想當志工，協助水災、地震等天災的受害者。",
+  "start": 382.68,
+  "end": 388.46
+ },
+ {
+  "n": 41,
+  "en": "Tom has nice drums, and he never lets anyone else play them.",
+  "zh": "湯姆有一套很棒的鼓，卻誰都不讓碰。",
+  "start": 393.18,
+  "end": 397.1
+ },
+ {
+  "n": 42,
+  "en": "At first, I thought Tom was joking, but later I realized he was serious.",
+  "zh": "起初我以為湯姆在開玩笑，後來才知道他是認真的。",
+  "start": 401.52,
+  "end": 406.58
+ },
+ {
+  "n": 43,
+  "en": "Last Sunday I tried making some Italian food for the first time, and it was delicious.",
+  "zh": "上個星期天我生平第一次試做義大利菜，結果非常好吃。",
+  "start": 411.18,
+  "end": 416.42
+ },
+ {
+  "n": 44,
+  "en": "Some people say that they don’t like summer because it is so hot that they don’t feel like doing anything. However, I like the heat of summer because I can swim in the sea.",
+  "zh": "有人說不喜歡夏天，是因為天氣熱得什麼都不想做。但我喜歡夏天的炎熱，因為可以到海裡游泳。",
+  "start": 421.2,
+  "end": 435.62
+ },
+ {
+  "n": 45,
+  "en": "James came to Japan eight years ago not only because he wanted to visit temples, but also because he had a Japanese girlfriend.",
+  "zh": "詹姆斯八年前來日本，不只是為了參觀寺廟，也因為他有個日本女朋友。",
+  "start": 440.16,
+  "end": 447.14
+ },
+ {
+  "n": 46,
+  "en": "I am against human cloning. That is because it could cause duplication of dictators.",
+  "zh": "我反對複製人，因為那可能讓獨裁者製造出自己的複製品。",
+  "start": 452.04,
+  "end": 457.52
+ },
+ {
+  "n": 47,
+  "en": "The graph shows that in Japan the birth rate has been decreasing since 1985. This decrease is partly because it costs a lot of money to raise children.",
+  "zh": "從圖表可以看出，日本的出生率自一九八五年起持續下降。部分原因是養育孩子的開銷很大。",
+  "start": 462.24,
+  "end": 475.94
+ },
+ {
+  "n": 48,
+  "en": "I apologized to Ann for being late, but she didn’t forgive me.",
+  "zh": "我為遲到向安道歉，但她不肯原諒我。",
+  "start": 480.54,
+  "end": 484.76
+ },
+ {
+  "n": 49,
+  "en": "During the math class, my cell phone began to ring, and the teacher severely scolded me. I regretted that I hadn’t turned it off.",
+  "zh": "數學課上我的手機突然響起，被老師狠狠罵了一頓。我非常後悔沒有把手機關機。",
+  "start": 489.12,
+  "end": 501.86
+ },
+ {
+  "n": 50,
+  "en": "I’m so busy doing the housework every day that I have no time to see a movie.",
+  "zh": "每天忙家事忙得不可開交，根本沒時間去看電影。",
+  "start": 506.28,
+  "end": 511.16
+ },
+ {
+  "n": 51,
+  "en": "This wooden desk is too heavy for me to carry upstairs alone.",
+  "zh": "這張木桌太重了，我一個人搬不到二樓。",
+  "start": 515.52,
+  "end": 519.14
+ },
+ {
+  "n": 52,
+  "en": "While traveling in Europe, I was disappointed that wherever I went, there were many Japanese tourists.",
+  "zh": "在歐洲旅行時，無論走到哪裡都會碰到很多日本觀光客，令我很掃興。",
+  "start": 523.92,
+  "end": 529.28
+ },
+ {
+  "n": 53,
+  "en": "I was very happy when I saw my mother going to work wearing the earrings I had bought her.",
+  "zh": "看到媽媽戴著我送她的耳環去上班，我非常高興。",
+  "start": 534.36,
+  "end": 539.36
+ },
+ {
+  "n": 54,
+  "en": "If you expect that schools only teach academic subjects, then this proves that you don’t understand what schools are for.",
+  "zh": "以為學校只是教書本知識的地方，就證明你不了解學校的功用。",
+  "start": 543.72,
+  "end": 550.58
+ },
+ {
+  "n": 55,
+  "en": "Most Japanese people spend most of their time working to live.",
+  "zh": "大多數日本人把大部分時間花在工作上，只為求生存。",
+  "start": 555.0,
+  "end": 558.68
+ },
+ {
+  "n": 56,
+  "en": "Japanese people usually express their feelings as indirectly as possible so that they won’t offend others.",
+  "zh": "日本人通常盡量以間接的方式表達感受，以免得罪別人。",
+  "start": 563.16,
+  "end": 568.76
+ },
+ {
+  "n": 57,
+  "en": "Whether a college is good or bad depends not only on how many books its library has and how good they are. It also depends on how intelligent its teachers and students are.",
+  "zh": "大學的好壞，不只取決於圖書館藏書的數量與品質，也取決於師生是否聰穎。",
+  "start": 573.36,
+  "end": 588.32
+ },
+ {
+  "n": 58,
+  "en": "The increase in the amount of CO2 in the atmosphere is closely connected with global warming.",
+  "zh": "大氣中二氧化碳的增加，與全球暖化息息相關。",
+  "start": 592.68,
+  "end": 598.46
+ },
+ {
+  "n": 59,
+  "en": "The more modern civilization advances, the longer we are forced to stay up at night, and the less sleep we get.",
+  "zh": "現代文明越進步，人們被迫熬夜的時間就越長，睡眠也越不足。",
+  "start": 602.94,
+  "end": 609.56
+ },
+ {
+  "n": 60,
+  "en": "Doctors and teachers are alike in that both of them deal not with things but with people.",
+  "zh": "醫師和教師的共通點是：他們處理的不是物品，而是人。",
+  "start": 613.86,
+  "end": 618.92
+ },
+ {
+  "n": 61,
+  "en": "Professional baseball is far more exciting at a stadium than on TV.",
+  "zh": "職棒在球場看，比在電視上看有趣一百倍。",
+  "start": 623.28,
+  "end": 627.68
+ },
+ {
+  "n": 62,
+  "en": "This motorbike is about twice as expensive in the U.K. as in Japan.",
+  "zh": "這輛機車在英國的價格大約是日本的兩倍。",
+  "start": 632.28,
+  "end": 636.62
+ },
+ {
+  "n": 63,
+  "en": "Just because young people today read less than they used to. It doesn’t always follow that they are less eager to learn.",
+  "zh": "就算現在年輕人的閱讀量比過去少，也不代表他們的求知慾降低了。",
+  "start": 641.16,
+  "end": 652.22
+ },
+ {
+  "n": 64,
+  "en": "Frankly speaking, the entrance exams I took yesterday were far more difficult than I had expected.",
+  "zh": "坦白說，我昨天參加的入學考試比想像中難太多了。",
+  "start": 652.86,
+  "end": 658.7
+ },
+ {
+  "n": 65,
+  "en": "A lot of people have personal computers, but very few of them know how to use them effectively.",
+  "zh": "擁有個人電腦的人很多，但懂得善加利用的人少之又少。",
+  "start": 663.24,
+  "end": 668.3
+ },
+ {
+  "n": 66,
+  "en": "A lot of housewives complain that prices are too high.",
+  "zh": "很多家庭主婦抱怨物價太高。",
+  "start": 672.96,
+  "end": 676.58
+ },
+ {
+  "n": 67,
+  "en": "In some countries people have too much food, while in others tens of thousands of children are starving.",
+  "zh": "世界上有的國家糧食多到吃不完，有的國家卻有數以萬計的兒童在挨餓。",
+  "start": 681.06,
+  "end": 686.72
+ },
+ {
+  "n": 68,
+  "en": "Don't forget to turn off the air conditioner before you go to bed, or you’ll catch a cold.",
+  "zh": "睡覺前記得關掉冷氣，不然可能會感冒。",
+  "start": 691.26,
+  "end": 696.44
+ },
+ {
+  "n": 69,
+  "en": "There is a saying that a cold can cause a variety of diseases. Take care not to catch a cold.",
+  "zh": "有句話說，感冒會引發各種疾病。千萬小心別感冒了。",
+  "start": 700.8,
+  "end": 711.08
+ },
+ {
+  "n": 70,
+  "en": "On the Internet, you can exchange thoughts and ideas with people all over the world, regardless of their age, sex, or nationality.",
+  "zh": "在網路上，可以跨越年齡、性別、國籍，和世界各地的人交流意見。",
+  "start": 715.56,
+  "end": 724.22
+ },
+ {
+  "n": 71,
+  "en": "However much exercise you get, you won’t lose weight unless you count your calories.",
+  "zh": "不管做多少運動，不計算卡路里就減不了重。",
+  "start": 729.24,
+  "end": 734.0
+ },
+ {
+  "n": 72,
+  "en": "Although you believe you know a word, you may learn something new if you look it up in the dictionary.",
+  "zh": "即使是自以為認識的單字，查字典還是會有新發現。",
+  "start": 738.54,
+  "end": 743.66
+ },
+ {
+  "n": 73,
+  "en": "Some Japanese tourist lack common sense and carry a lot of cash their back pockets.",
+  "zh": "有些日本觀光客欠缺常識，把大把現金塞在褲子後口袋裡隨身攜帶。",
+  "start": 748.44,
+  "end": 753.26
+ },
+ {
+  "n": 74,
+  "en": "In order to stay healthy, you should have a balanced diet and get regular exercise.",
+  "zh": "保持健康的秘訣是均衡飲食、規律運動。",
+  "start": 757.86,
+  "end": 762.26
+ },
+ {
+  "n": 75,
+  "en": "If you live in a developing country for a while, you have an opportunity to look at Japan from a different point of view.",
+  "zh": "在開發中國家住上一陣子，是換個角度重新審視日本的好機會。",
+  "start": 767.16,
+  "end": 773.72
+ },
+ {
+  "n": 76,
+  "en": "It is not until you go abroad that you realize how many neon lights there are in big Japanese cities.",
+  "zh": "直到出國，你才會發現日本大城市裡的霓虹燈之多。",
+  "start": 778.08,
+  "end": 783.5
+ },
+ {
+  "n": 77,
+  "en": "It is a pity that many Japanese people mistakenly believe that they have only to speak English to be internationally-minded.",
+  "zh": "遺憾的是，很多日本人誤以為只要會說英語就能成為國際人。",
+  "start": 788.34,
+  "end": 794.96
+ },
+ {
+  "n": 78,
+  "en": "It is surprising that many Americans don’t care how you pronounce English as long as they can understand what you are trying to say.",
+  "zh": "令人驚訝的是，很多美國人只要聽得懂你想說什麼，就不在乎你的英文發音好不好。",
+  "start": 800.64,
+  "end": 808.82
+ },
+ {
+  "n": 79,
+  "en": "The best things you can do to protect nature are to reduce garbage and to use environmentally friendly products.",
+  "zh": "要保護大自然，能做的不外乎減少垃圾、盡量使用環保產品。",
+  "start": 813.12,
+  "end": 819.08
+ },
+ {
+  "n": 80,
+  "en": "It is said that seven out of ten young Japanese people don’t believe in religion.",
+  "zh": "據說日本年輕人十個裡有七個沒有宗教信仰。",
+  "start": 823.74,
+  "end": 828.02
+ },
+ {
+  "n": 81,
+  "en": "Way of greeting vary from country to country. In Japan, bowing is more common than shaking hands.",
+  "zh": "打招呼的方式因國家而異，在日本鞠躬比握手更常見。",
+  "start": 832.62,
+  "end": 839.66
+ },
+ {
+  "n": 82,
+  "en": "Hamamatsu is located east of Lake Hamana, which is famous for its beautiful scenery and delicious fish.",
+  "zh": "濱松位於濱名湖的東邊；這座湖以美麗的景色與美味的魚鮮聞名。",
+  "start": 844.38,
+  "end": 850.64
+ },
+ {
+  "n": 83,
+  "en": "Quite a few elderly women look down on their husbands, who cannot anything by themselves and ask too much of them.",
+  "zh": "不少年長女性瞧不起自己的丈夫，因為他們什麼都無法自理，還處處依賴妻子。",
+  "start": 855.18,
+  "end": 863.06
+ },
+ {
+  "n": 84,
+  "en": "The movie theater is about twenty minutes’ walk from here, but it takes only five minutes to get there by subway.",
+  "zh": "從這裡走路到那家電影院約二十分鐘，搭地鐵只要五分鐘。",
+  "start": 867.54,
+  "end": 873.92
+ },
+ {
+  "n": 85,
+  "en": "It cost ten thousand yen to have this bike repaired.",
+  "zh": "修這輛自行車花了一萬日圓。",
+  "start": 878.58,
+  "end": 881.78
+ },
+ {
+  "n": 86,
+  "en": "There are four people in my family, Our apartment is on the fifth floor of this building.",
+  "zh": "我家四口人，住在這棟大樓的五樓。",
+  "start": 886.5,
+  "end": 891.2
+ },
+ {
+  "n": 87,
+  "en": "The tendency for young people to believe everything that is printed is nothing new.",
+  "zh": "年輕人對印出來的東西照單全收，這種傾向並不是現在才有的。",
+  "start": 895.68,
+  "end": 900.08
+ },
+ {
+  "n": 88,
+  "en": "When I was studying in Paris, a famous painter bought me a meal at a first-class restaurant.",
+  "zh": "我留學巴黎時，曾有位知名畫家請我在高級餐廳吃飯。",
+  "start": 904.62,
+  "end": 909.92
+ },
+ {
+  "n": 89,
+  "en": "Tom finally realized his dream of becoming an astronaut, but at the expense of many other things.",
+  "zh": "犧牲了很多之後，湯姆終於實現了成為太空人的夢想。",
+  "start": 914.64,
+  "end": 920.24
+ },
+ {
+  "n": 90,
+  "en": "If city life gives you stress and fatigue, it is best to relax in the mountains or on beaches in order to relieve them.",
+  "zh": "要消除都市生活累積的壓力與疲勞，最好的方式就是到大自然中放鬆。",
+  "start": 924.84,
+  "end": 932.0
+ },
+ {
+  "n": 91,
+  "en": "In Japan, women have difficulty getting promoted or returning to their jobs after giving birth and raising their children.",
+  "zh": "在日本，女性生產、育兒之後，在升遷與復職上往往比較吃虧。",
+  "start": 936.24,
+  "end": 943.16
+ },
+ {
+  "n": 92,
+  "en": "In the U.S., parents drive their children everywhere until they are old enough to get a driver’s license.",
+  "zh": "在美國，孩子在到達可以自己開車的年齡之前，去哪都由父母開車接送。",
+  "start": 947.64,
+  "end": 953.3
+ },
+ {
+  "n": 93,
+  "en": "“Excuse me. Could you tell me how to get to the post office?” “Go straight for two blocks, then turn left. You’ll find it on your right.”",
+  "zh": "「不好意思，請問郵局怎麼走？」「直走兩個街區，再左轉，你會在右手邊看到它。」",
+  "start": 957.9,
+  "end": 968.24
+ },
+ {
+  "n": 94,
+  "en": "“What do you think of our new teacher?” “There is something about her that attracts me.”",
+  "zh": "「你覺得我們的新老師怎麼樣？」「她身上有種吸引我的特質。」",
+  "start": 972.6,
+  "end": 977.48
+ },
+ {
+  "n": 95,
+  "en": "People who don’t feel guilty about occupying two seats on a crowded train really make me angry.",
+  "zh": "在擁擠的電車上，看到有人佔著兩個座位還一副若無其事的樣子，真的讓人很火大。",
+  "start": 981.96,
+  "end": 987.56
+ },
+ {
+  "n": 96,
+  "en": "Everyone is born with a talent. The question is whether they can find it or not.",
+  "zh": "每個人生來都有某種才華，問題在於能否找到它。",
+  "start": 991.98,
+  "end": 997.52
+ },
+ {
+  "n": 97,
+  "en": "When I left the office for lunch, I ran into an old friend from high school.",
+  "zh": "我出公司去吃午飯，正好遇見高中時代的朋友。",
+  "start": 1001.88,
+  "end": 1006.34
+ },
+ {
+  "n": 98,
+  "en": "This music is worth listening to over and over again, I recommend it.",
+  "zh": "這音樂值得一聽再聽，你也一定要聽聽看。",
+  "start": 1010.88,
+  "end": 1015.46
+ },
+ {
+  "n": 99,
+  "en": "Teeth play an important part in your health. If you want to stay healthy, you should brush your teeth after every meal.",
+  "zh": "牙齒對健康很重要。想保持健康，就該每餐飯後刷牙。",
+  "start": 1019.76,
+  "end": 1031.3
+ },
+ {
+  "n": 100,
+  "en": "Bear in mind that if you have enthusiasm, you can succeed in anything.",
+  "zh": "請記住：只要有熱情，做任何事都能成功。",
+  "start": 1032.36,
+  "end": 1036.34
+ }
+];
+
+/* ================= state ================= */
+const LS_DONE = "dragon100.done", LS_SET = "dragon100.settings", LS_DICT = "dragon100.dictated";
+let done = new Set(JSON.parse(localStorage.getItem(LS_DONE) || "[]"));
+let settings = Object.assign({speed:1, repeat:1, mode:"api", drill:"read"},
+                             JSON.parse(localStorage.getItem(LS_SET) || "{}"));
+let dictated = JSON.parse(localStorage.getItem(LS_DICT) || "{}");
+
+// book typos / odd punctuation: accept both the printed text and a corrected form
+const ACCEPTED = {
+  4:  ["Most Japanese high school students go to a cram school to prepare for college entrance exams."],
+  17: ["The best thing about my stay with an American family was that the parents treated me just like their daughter."],
+  63: ["Just because young people today read less than they used to, it doesn’t always follow that they are less eager to learn."],
+  73: ["Some Japanese tourists lack common sense and carry a lot of cash in their back pockets."],
+  81: ["Ways of greeting vary from country to country. In Japan, bowing is more common than shaking hands."],
+  83: ["Quite a few elderly women look down on their husbands, who cannot do anything by themselves and ask too much of them."],
+  86: ["There are four people in my family. Our apartment is on the fifth floor of this building."],
+  98: ["This music is worth listening to over and over again. I recommend it."]
+};
+
+let mode = "api";                  // "api" | "embed" | "tts"
+let player = null, apiReady = false, playerReady = false, apiLoading = false;
+let cur = -1, playing = false, playAll = false, repeatCount = 0, pendingSeek = null;
+
+let tickTimer = null;              // shared progress ticker
+let segWallStart = 0, segOffset = 0;   // embed / tts timeline
+let embedFrame = null, embedAlive = false, embedTime = null, embedLoaded = false;
+let ttsToken = 0, ttsUtter = null, ttsSupported = false;
+let ending = false;
+let drillEl = null, drillIdx = -1;   // open dictation panel
+
+const $ = s => document.querySelector(s);
+const fmt = t => { const m = Math.floor(t/60), s = Math.floor(t%60);
+                   return m + ":" + String(s).padStart(2,"0"); };
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+
+/* ================= list ================= */
+const listEl = $("#list");
+DATA.forEach((s, i) => {
+  const li = document.createElement("li");
+  li.className = "item";
+  li.dataset.i = i;
+  li.innerHTML =
+    '<span class="num">' + s.n + '</span>' +
+    '<div class="body"><p class="en"></p><p class="zh"></p></div>' +
+    '<div class="side"><span class="time">' + fmt(s.end - s.start) + '</span>' +
+    '<span class="check" role="button">聽過</span>' +
+    '<span class="dcheck" role="button">默寫</span></div>';
+  li.querySelector(".en").textContent = s.en;
+  li.querySelector(".zh").textContent = s.zh;
+  li.addEventListener("click", e => {
+    if (e.target.classList.contains("check")) { toggleDone(i); e.stopPropagation(); return; }
+    if (e.target.classList.contains("dcheck")) {
+      e.stopPropagation(); setDrill("write"); openDrill(i); return;
+    }
+    if (e.target && e.target.closest && e.target.closest(".drill")) return;
+    if (settings.drill === "write") openDrill(i);
+    else play(i, true);
+  });
+  listEl.appendChild(li);
+});
+const rows = [...listEl.children];
+
+function refreshDoneUI() {
+  rows.forEach((li, i) => {
+    const n = DATA[i].n;
+    li.classList.toggle("done", done.has(n));
+    const ok = !!(dictated[n] && dictated[n].ok);
+    const b = li.querySelector(".dcheck");
+    b.classList.toggle("on", ok);
+    b.textContent = ok ? "已默寫" : "默寫";
+    b.title = ok ? "已通過默寫，點此再練一次" : "點此開始默寫這一句";
+  });
+  const heard = [...done].filter(n => DATA.some(s => s.n === n)).length;
+  const passed = DATA.filter(s => dictated[s.n] && dictated[s.n].ok).length;
+  $("#progress").textContent = "已聽 " + heard + " / 100 · 已默寫 " + passed + " / 100";
+}
+function toggleDone(n) {
+  const num = DATA[n].n;
+  done.has(num) ? done.delete(num) : done.add(num);
+  localStorage.setItem(LS_DONE, JSON.stringify([...done]));
+  refreshDoneUI();
+}
+function saveSettings(){ localStorage.setItem(LS_SET, JSON.stringify(settings)); }
+function markDictated(i, tries) {
+  const n = DATA[i].n, prev = dictated[n];
+  if (prev && prev.ok && prev.tries <= tries) return;      // keep the best run
+  dictated[n] = {ok:true, tries:tries, date:new Date().toISOString().slice(0,10)};
+  localStorage.setItem(LS_DICT, JSON.stringify(dictated));
+  refreshDoneUI();
+}
+function markDone(i) {
+  if (!done.has(DATA[i].n)) {
+    done.add(DATA[i].n);
+    localStorage.setItem(LS_DONE, JSON.stringify([...done]));
+    refreshDoneUI();
+  }
+}
+refreshDoneUI();
+
+/* ================= filter ================= */
+function applyFilter() {
+  const q = $("#q").value.trim().toLowerCase();
+  const f = $("#filter").value;
+  let visible = 0;
+  rows.forEach((li, i) => {
+    const s = DATA[i];
+    let show = true;
+    if (q) show = (s.en + " " + s.zh + " " + s.n).toLowerCase().includes(q);
+    if (show && f === "done") show = done.has(s.n);
+    if (show && f === "todo") show = !done.has(s.n);
+    li.style.display = show ? "" : "none";
+    if (show) visible++;
+  });
+  $("#empty").style.display = visible ? "none" : "";
+}
+$("#q").addEventListener("input", applyFilter);
+$("#filter").addEventListener("change", applyFilter);
+
+function visibleIdxs() {
+  return rows.map((li, i) => li.style.display === "none" ? -1 : i).filter(i => i >= 0);
+}
+function neighbour(dir) {
+  const vis = visibleIdxs();
+  if (!vis.length) return -1;
+  const pos = vis.indexOf(cur);
+  if (pos === -1) return dir > 0 ? vis[0] : vis[vis.length - 1];
+  const next = pos + dir;
+  return next >= 0 && next < vis.length ? vis[next] : -1;
+}
+
+/* ================= engine: mode management ================= */
+const MODE_LABEL = {
+  api:   "音源：YouTube 播放器",
+  embed: "音源：YouTube 備援播放器",
+  tts:   "音源：離線朗讀（系統語音）"
+};
+function paintMode() {
+  $("#modeLabel").textContent = MODE_LABEL[mode];
+  $("#speed").disabled = (mode === "embed");
+  $("#speed").title = (mode === "embed") ? "備援播放器不支援調速" : "播放速度";
+  const note = $("#videoNote");
+  if (mode === "tts") {
+    note.style.display = "flex";
+    note.textContent = "離線朗讀模式\nYouTube 無法載入，改用系統英語語音朗讀句子。";
+    $("#ytbox").style.display = "none";
+  } else {
+    note.style.display = "none";
+    $("#ytbox").style.display = "";
+  }
+}
+function showStatus(msg) {
+  $("#statusMsg").textContent = msg;
+  $("#status").classList.add("show");
+}
+function hideStatus(){ $("#status").classList.remove("show"); }
+
+function setMode(m, reason) {
+  if (mode === m && !reason) return;
+  hardStop();
+  mode = m; settings.mode = m; saveSettings();
+  if (m === "api")   { embedFrame = null; resetApi(); }
+  if (m === "embed") enterEmbed(reason);
+  if (m === "tts")   enterTts(reason);
+  paintMode();
+}
+
+/* ================= engine: YouTube IFrame API ================= */
+function resetApi() {
+  player = null; playerReady = false; pendingSeek = null;
+  $("#ytbox").innerHTML = '<div id="yt"></div>';
+  if (apiReady && typeof YT !== "undefined" && YT.Player) createPlayer();
+  else loadApi();
+}
+function loadApi() {
+  if (apiReady) { createPlayer(); return; }
+  if (apiLoading) return;
+  apiLoading = true;
+  const s = document.createElement("script");
+  s.src = "https://www.youtube.com/iframe_api";
+  s.onerror = () => { apiLoading = false; degrade("無法載入 YouTube 播放器腳本（網路被擋或離線）。"); };
+  document.head.appendChild(s);
+  setTimeout(() => {
+    if (!apiReady) { apiLoading = false; degrade("YouTube 播放器逾時未就緒（載入超過 12 秒）。"); }
+  }, 12000);
+}
+function degrade(reason) {
+  if (mode === "embed" || mode === "tts") return;
+  showStatus(reason + " 已自動切換到備援播放器，若仍無聲可改用離線朗讀。");
+  setMode("embed", reason);
+}
+
+window.onYouTubeIframeAPIReady = function () {
+  apiReady = true;
+  apiLoading = false;
+  createPlayer();
+};
+function createPlayer() {
+  if (!apiReady || player) return;
+  $("#ytbox").innerHTML = '<div id="yt"></div>';
+  try {
+    player = new YT.Player("yt", {
+      videoId: VIDEO_ID,
+      playerVars: { playsinline: 1, rel: 0, modestbranding: 1, start: 0 },
+      events: {
+        onReady: () => {
+          playerReady = true;
+          apiLoading = false;
+          try { player.setPlaybackRate(settings.speed); } catch (e) {}
+          hideStatus();
+          if (pendingSeek !== null) { const i = pendingSeek; pendingSeek = null; play(i, false); }
+        },
+        onError: () => degrade("這個影片無法嵌入播放（可能被設為禁止嵌入）。"),
+        onStateChange: e => {
+          playing = (e.data === 1);
+          if (e.data === 1) startTick();
+          if (e.data === 2 || e.data === 0) stopTick();
+        }
+      }
+    });
+  } catch (err) {
+    degrade("建立 YouTube 播放器失敗。");
+  }
+}
+
+function apiSeek(i) {
+  const s = DATA[i];
+  player.seekTo(s.start + 0.05, true);
+  try { player.setPlaybackRate(settings.speed); } catch (e) {}
+  player.playVideo();
+}
+
+/* ================= engine: plain iframe (fallback) ================= */
+function embedSrc(s, autoplay, at) {
+  let st = Math.floor(at != null ? at : s.start);
+  st = clamp(st, 0, Math.max(0, Math.floor(s.end) - 1));
+  // file:// pages report origin "null" — sending that breaks YouTube's widget
+  // handshake, so only attach a real http(s) origin.
+  let origin = "";
+  try { if (location && /^https?:\/\//.test(String(location.origin))) origin = location.origin; }
+  catch (e) {}
+  // base = YouTube's official embed URL (share params kept), plus per-sentence range
+  return "https://www.youtube.com/embed/" + VIDEO_ID +
+    "?si=YPCLWqkTA_glCWg_" +
+    "&start=" + st + "&end=" + Math.ceil(s.end) +
+    "&autoplay=" + (autoplay ? 1 : 0) +
+    "&rel=0&playsinline=1&enablejsapi=1" +
+    (origin ? "&origin=" + encodeURIComponent(origin) : "");
+}
+function ensureEmbedFrame() {
+  if (embedFrame) return embedFrame;
+  const box = $("#ytbox");
+  box.innerHTML = "";
+  // official YouTube embed markup
+  const f = document.createElement("iframe");
+  f.setAttribute("width", "560");
+  f.setAttribute("height", "315");
+  f.setAttribute("title", "YouTube video player");
+  f.setAttribute("frameborder", "0");
+  f.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share");
+  f.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
+  f.setAttribute("allowfullscreen", "");
+  box.appendChild(f);
+  embedFrame = f;
+  embedLoaded = false;
+  f.addEventListener("load", () => {
+    embedLoaded = true;
+    embedPost({event:"listening", id:1, channel:"widget"});
+  });
+  return f;
+}
+function embedPost(msg) {
+  try {
+    if (embedFrame && embedFrame.contentWindow)
+      embedFrame.contentWindow.postMessage(JSON.stringify(msg), "*");
+  } catch (e) {}
+}
+function enterEmbed(reason) {
+  mode = "embed"; settings.mode = "embed"; saveSettings();
+  const f = ensureEmbedFrame();
+  // show a paused player right away (also kicks off the postMessage handshake)
+  if (!f.src) f.src = embedSrc(DATA[cur >= 0 ? cur : 0], false);
+  paintMode();
+  showStatus((reason ? reason + " " : "") + "目前使用備援播放器（YouTube 一般嵌入，功能較陽春）。");
+  setTimeout(() => {
+    if (mode === "embed" && !embedLoaded)
+      showStatus("備援播放器也載入失敗（瀏覽器可能完全無法連上 YouTube）。" +
+                 "可改用離線朗讀繼續練習，或到 YouTube 開啟本影片。");
+  }, 10000);
+}
+function embedPlay(i) {
+  const s = DATA[i];
+  const f = ensureEmbedFrame();
+  segOffset = s.start; segWallStart = Date.now(); embedTime = null;
+  f.src = embedSrc(s, true);
+  playing = true;
+  startTick();
+}
+function embedPause() {
+  const t = videoTime();
+  if (embedAlive) {
+    embedPost({event:"command", func:"pauseVideo", args:[]});
+  } else if (embedFrame) {
+    // no handshake: reload the frame paused at the estimated position
+    segOffset = t; embedTime = null;
+    embedFrame.src = embedSrc(DATA[cur], false, t);
+  }
+  playing = false; stopTick();
+}
+function embedResume() {
+  const t = videoTime();
+  if (embedAlive) {
+    embedPost({event:"command", func:"playVideo", args:[]});
+    playing = true; startTick();
+  } else if (embedFrame) {
+    segOffset = t; embedTime = null;
+    embedFrame.src = embedSrc(DATA[cur], true, t);
+    playing = true; startTick();
+  }
+}
+
+// messages posted back by the embed (only if the handshake succeeds)
+window.addEventListener("message", e => {
+  let d = e.data;
+  if (typeof d === "string") { try { d = JSON.parse(d); } catch (err) { return; } }
+  if (!d || typeof d !== "object" || d.event === undefined) return;
+  if (d.event === "onReady") embedAlive = true;
+  if (d.event === "infoDelivery" && d.info) {
+    embedAlive = true;
+    if (typeof d.info.currentTime === "number") embedTime = d.info.currentTime;
+  }
+  if (d.event === "onStateChange") {
+    if (d.info === 0) onEnd();          // ended at segment end
+    if (d.info === 1) { playing = true; startTick(); }
+    if (d.info === 2) { playing = false; }
+  }
+});
+
+/* ================= engine: offline TTS ================= */
+function enterTts(reason) {
+  mode = "tts"; settings.mode = "tts"; saveSettings();
+  ttsSupported = ("speechSynthesis" in window) && ("SpeechSynthesisUtterance" in window);
+  paintMode();
+  showStatus((reason ? reason + " " : "") +
+    (ttsSupported ? "目前使用離線朗讀（系統英語語音），發音者與影片不同。"
+                  : "這個瀏覽器不支援離線朗讀，只能開啟 YouTube 頁面收聽。"));
+}
+function ttsSpeak(i) {
+  if (!ttsSupported) { openInYoutube(i); return; }
+  const s = DATA[i];
+  const token = ++ttsToken;
+  try { window.speechSynthesis.cancel(); } catch (e) {}
+  const u = new window.SpeechSynthesisUtterance(s.en);
+  u.lang = "en-US"; u.rate = settings.speed;
+  u.onend = () => { if (token === ttsToken && cur === i) onEnd(); };
+  u.onerror = () => { if (token === ttsToken && cur === i) onEnd(); };
+  ttsUtter = u;
+  segOffset = s.start; segWallStart = Date.now();
+  try { window.speechSynthesis.speak(u); } catch (e) { openInYoutube(i); return; }
+  playing = true;
+  startTick();
+}
+function ttsPause(){ try { window.speechSynthesis.pause(); } catch(e){} playing = false; stopTick(); }
+function ttsResume(){ try { window.speechSynthesis.resume(); } catch(e){} playing = true; startTick(); }
+function ttsCancel(){ try { window.speechSynthesis.cancel(); } catch(e){} ttsToken++; }
+
+/* ================= shared timeline / ticker ================= */
+function videoTime() {
+  if (mode === "api")   return (player && player.getCurrentTime) ? player.getCurrentTime() : null;
+  if (mode === "embed") {
+    if (embedAlive && embedTime != null) return embedTime;
+    return segOffset + (Date.now() - segWallStart) / 1000;
+  }
+  if (mode === "tts")   return segOffset + (Date.now() - segWallStart) / 1000;
+  return null;
+}
+function startTick() {
+  if (tickTimer) return;
+  tickTimer = setInterval(tick, 100);
+}
+function stopTick(){ clearInterval(tickTimer); tickTimer = null; }
+function tick() {
+  if (cur < 0) return;
+  const s = DATA[cur];
+  const t = videoTime();
+  if (t == null) return;
+  const pct = clamp((t - s.start) / Math.max(0.5, s.end - s.start), 0, 1);
+  $("#seekFill").style.width = (pct * 100).toFixed(1) + "%";
+  // safety net: TTS normally ends via utterance.onend, allow a little slack
+  const limit = (mode === "tts") ? s.end + 3 : s.end - 0.03;
+  if (t >= limit) onEnd();
+}
+
+/* ================= transport ================= */
+function enginePlay(i) {
+  if (mode === "api") {
+    if (playerReady && player) apiSeek(i);
+    else { pendingSeek = i; if (!apiReady) loadApi(); }
+  } else if (mode === "embed") {
+    embedPlay(i);
+  } else {
+    ttsSpeak(i);
+  }
+}
+function apiCmd(fn) {
+  try { if (player && playerReady && typeof player[fn] === "function") player[fn](); }
+  catch (e) {}
+}
+function enginePause() {
+  if (mode === "api")   { apiCmd("pauseVideo"); stopTick(); }
+  else if (mode === "embed") embedPause();
+  else ttsPause();
+  playing = false;
+}
+function engineResume() {
+  if (mode === "api")   { apiCmd("playVideo"); }
+  else if (mode === "embed") embedResume();
+  else ttsResume();
+}
+function engineStop() {
+  stopTick();
+  if (mode === "api")   { apiCmd("pauseVideo"); }
+  else if (mode === "embed") {
+    if (embedAlive) embedPost({event:"command", func:"pauseVideo", args:[]});
+    else if (embedFrame) embedFrame.src = embedSrc(DATA[Math.max(0,cur)], false, DATA[Math.max(0,cur)].start);
+  }
+  else ttsCancel();
+  playing = false;
+}
+function hardStop(){ engineStop(); }
+
+function play(i, resetRepeat) {
+  if (i < 0 || i >= DATA.length) return;
+  ending = false;                       // a fresh user-initiated play lifts the end-guard
+  if (resetRepeat) { playAll = false; $("#playAllBtn").classList.remove("on");
+                     $("#playAllBtn").textContent = "▶ 連續播放"; }
+  if (resetRepeat || i !== cur) repeatCount = 0;
+  cur = i;
+  highlight();
+  paintNow();
+  $("#seekFill").style.width = "0%";
+  enginePlay(i);
+}
+function paintNow() {
+  if (cur < 0) return;
+  const s = DATA[cur];
+  const write = settings.drill === "write";
+  $("#nowEn").textContent = write ? ("第 " + s.n + " 句 · 默寫中（答案不顯示）") : s.en;
+  $("#nowZh").textContent = s.zh;
+  $("#nowMeta").textContent = "第 " + s.n + " 句 · " + fmt(s.start) + " – " + fmt(s.end) +
+      "（約 " + Math.round(s.end - s.start) + " 秒）";
+}
+function highlight() {
+  rows.forEach((li, i) => li.classList.toggle("current", i === cur));
+  const li = rows[cur];
+  if (li && li.style.display !== "none") {
+    const r = li.getBoundingClientRect();
+    if (r.top < 90 || r.bottom > window.innerHeight - 40)
+      li.scrollIntoView({block:"center", behavior:"smooth"});
+  }
+}
+function onEnd() {
+  if (ending) return;
+  ending = true;
+  setTimeout(() => { ending = false; }, 300);
+  stopTick();
+  engineStop();
+  // dictation listening does not count towards the "heard" progress
+  if (cur >= 0 && settings.drill !== "write") markDone(cur);
+  repeatCount++;
+  const rep = settings.repeat;
+  if (repeatCount < rep) {
+    setTimeout(() => { if (cur >= 0) enginePlay(cur); }, 400);
+    return;
+  }
+  if (playAll) {
+    const nxt = neighbour(1);
+    if (nxt >= 0) setTimeout(() => play(nxt, false), 450);
+    else stopAll();
+  }
+}
+function stopAll() {
+  playAll = false;
+  $("#playAllBtn").classList.remove("on");
+  $("#playAllBtn").textContent = "▶ 連續播放";
+  engineStop();
+}
+function togglePlay() {
+  if (cur < 0) { const v = visibleIdxs(); if (v.length) play(v[0], true); return; }
+  if (playing) enginePause(); else engineResume();
+}
+function openInYoutube(i) {
+  window.open("https://www.youtube.com/watch?v=" + VIDEO_ID +
+              "&t=" + Math.floor(DATA[i].start) + "s", "_blank");
+}
+
+/* ================= dictation drill (默寫) ================= */
+const DRILL_MASK = "（默寫中 · 請聽音作答）";
+
+// input-side character equivalences only; everything else is compared strictly
+function normalize(t) {
+  let s = (t === null || t === undefined) ? "" : String(t);
+  s = s.replace(/[\u2018\u2019]/g, "'");            // ‘ ’ → '
+  s = s.replace(/[\u201C\u201D]/g, '"');            // “ ” → "
+  s = s.replace(/[\uFF01-\uFF5E]/g,                 // fullwidth → ascii
+                c => String.fromCharCode(c.charCodeAt(0) - 65248));
+  s = s.replace(/\u3000/g, " ").replace(/[\r\n]+/g, " ");
+  return s.replace(/^\s+|\s+$/g, "");
+}
+function wordDiff(a, b) {                           // word-level LCS diff
+  const n = a.length, m = b.length;
+  const dp = [];
+  for (let i = 0; i <= n; i++) dp.push(new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--)
+    for (let j = m - 1; j >= 0; j--)
+      dp[i][j] = (a[i] === b[j]) ? dp[i + 1][j + 1] + 1
+                                 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+  const out = [];
+  let i = 0, j = 0;
+  while (i < n && j < m) {
+    if (a[i] === b[j]) { out.push(["=", a[i]]); i++; j++; }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) { out.push(["-", a[i]]); i++; }
+    else { out.push(["+", b[j]]); j++; }
+  }
+  while (i < n) out.push(["-", a[i++]]);
+  while (j < m) out.push(["+", b[j++]]);
+  return out;
+}
+function checkAnswer(i, raw) {
+  const s = DATA[i], typed = normalize(raw);
+  const cands = [s.en].concat(ACCEPTED[s.n] || []);
+  for (let k = 0; k < cands.length; k++)
+    if (typed === normalize(cands[k])) return {ok:true, cand:cands[k]};
+  return {ok:false, diff: wordDiff(normalize(s.en).split(" "), typed.split(" "))};
+}
+
+function setDrill(m) {
+  settings.drill = m; saveSettings();
+  $("#drillRead").classList.toggle("on", m === "read");
+  $("#drillWrite").classList.toggle("on", m === "write");
+  if (m !== "write") closeDrill();
+  paintMask();
+  paintNow();
+}
+function paintMask() {
+  const write = settings.drill === "write";
+  rows.forEach((li, i) => {
+    const en = li.querySelector(".en");
+    en.textContent = write ? DRILL_MASK : DATA[i].en;
+    en.classList.toggle("masked", write);
+  });
+}
+function closeDrill() {
+  if (drillEl && drillEl.parentNode) drillEl.remove();
+  if (drillIdx >= 0 && rows[drillIdx]) rows[drillIdx].classList.remove("drilling");
+  drillEl = null; drillIdx = -1;
+}
+function openDrill(i) {
+  if (i < 0 || i >= DATA.length) return;
+  if (settings.drill !== "write") setDrill("write");
+  if (drillIdx === i && drillEl) {                   // same row: keep the draft
+    const ta = drillEl.querySelector(".di");
+    if (ta && ta.focus) ta.focus();
+    play(i, true);
+    return;
+  }
+  closeDrill();
+  drillIdx = i;
+  drillEl = buildDrill(i);
+  rows[i].appendChild(drillEl);
+  rows[i].classList.add("drilling");
+  play(i, true);
+  const ta = drillEl.querySelector(".di");
+  if (ta && ta.focus) ta.focus();
+}
+function buildDrill(i) {
+  const s = DATA[i];
+  const el = document.createElement("div");
+  el.className = "drill";
+  el.innerHTML =
+    '<div class="drill-head">' +
+      '<span class="dz"></span><span class="wc"></span>' +
+      '<button class="again" type="button">▶ 重聽</button></div>' +
+    '<textarea class="di" rows="2" spellcheck="false" ' +
+      'placeholder="輸入你聽到的英文句子…"></textarea>' +
+    '<div class="drill-foot">Enter 送出 · Shift+Enter 換行 · 大小寫與標點需完全相符</div>' +
+    '<div class="drill-result" style="display:none"></div>';
+  el.querySelector(".dz").textContent = s.zh;
+  el.querySelector(".wc").textContent = s.en.split(" ").length + " 詞";
+  el.querySelector(".again").onclick = () => play(i, true);
+  el.addEventListener("click", e => e.stopPropagation());  // clicks inside never re-open
+  const ta = el.querySelector(".di");
+  ta.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); drillSubmit(i); }
+  });
+  el._tries = 0;
+  return el;
+}
+function drillSubmit(i) {
+  const el = drillEl;
+  if (!el || drillIdx !== i) return;
+  const s = DATA[i];
+  const ta = el.querySelector(".di");
+  const res = el.querySelector(".drill-result");
+  const raw = ta.value;
+  if (!normalize(raw)) {
+    res.style.display = ""; res.className = "drill-result"; res.innerHTML = "";
+    res.textContent = "請先輸入你聽到的句子。";
+    return;
+  }
+  el._tries++;
+  const r = checkAnswer(i, raw);
+  res.style.display = "";
+  res.innerHTML = "";
+  if (r.ok) {
+    res.className = "drill-result ok";
+    const t = document.createElement("div");
+    t.textContent = "✓ 答對了！（第 " + el._tries + " 次嘗試）";
+    res.appendChild(t);
+    markDictated(i, el._tries);            // stay on this row — no auto-advance
+    return;
+  }
+  res.className = "drill-result";
+  const legend = document.createElement("div");
+  legend.className = "legend";
+  legend.textContent = "刪除線＝漏打或拼錯 · 紅底＝多打（只標差異，不給提示）";
+  res.appendChild(legend);
+  const diff = document.createElement("div");
+  diff.className = "diff";
+  r.diff.forEach(op => {
+    const sp = document.createElement("span");
+    sp.className = op[0] === "=" ? "d-ok" : (op[0] === "-" ? "d-miss" : "d-extra");
+    sp.textContent = op[1] + " ";
+    diff.appendChild(sp);
+  });
+  res.appendChild(diff);
+  const ans = document.createElement("div");
+  ans.className = "ans";
+  const lab = document.createElement("span");
+  lab.className = "lab"; lab.textContent = "正確答案：";
+  const en = document.createElement("span");
+  en.className = "ans-en"; en.textContent = s.en;
+  ans.appendChild(lab); ans.appendChild(en);
+  res.appendChild(ans);
+  const zh = document.createElement("div");
+  zh.className = "ans-zh"; zh.textContent = s.zh;
+  res.appendChild(zh);
+  const again = document.createElement("button");
+  again.type = "button"; again.className = "again";
+  again.textContent = "▶ 再聽一次";
+  again.onclick = () => play(i, true);
+  res.appendChild(again);
+}
+
+/* ================= controls ================= */
+$("#prevBtn").onclick = () => { const n = neighbour(-1); if (n >= 0) play(n, true); };
+$("#nextBtn").onclick = () => { const n = neighbour(1); if (n >= 0) play(n, true); };
+$("#replayBtn").onclick = () => { if (cur >= 0) { repeatCount = 0; enginePlay(cur); } };
+$("#stopBtn").onclick = stopAll;
+
+$("#drillRead").onclick = () => setDrill("read");
+$("#drillWrite").onclick = () => setDrill("write");
+
+/* ---- reset heard + dictation progress ---- */
+let resetArmedAt = 0;
+$("#resetBtn").onclick = () => {
+  const msg = "確定要清除「已聽」與「已默寫」的進度嗎？\n" +
+              "（播放速度、重複、音源等設定會保留，且無法復原）";
+  let go;
+  if (typeof confirm === "function") go = confirm(msg);
+  else {                                  // no dialog available: two-click guard
+    const now = Date.now();
+    if (now - resetArmedAt < 5000) { go = true; }
+    else {
+      resetArmedAt = now;
+      const b = $("#resetBtn");
+      b.classList.add("armed"); b.textContent = "再按一次確認";
+      setTimeout(() => { b.classList.remove("armed"); b.textContent = "重設"; }, 5000);
+      return;
+    }
+  }
+  if (!go) return;
+  resetArmedAt = 0;
+  done = new Set();
+  dictated = {};
+  localStorage.setItem(LS_DONE, "[]");
+  localStorage.setItem(LS_DICT, "{}");
+  refreshDoneUI();
+  const b = $("#resetBtn");
+  b.classList.remove("armed");
+  b.textContent = "✓ 已重設";
+  setTimeout(() => { b.textContent = "重設"; }, 1500);
+};
+
+$("#playAllBtn").onclick = function () {
+  playAll = !playAll;
+  this.classList.toggle("on", playAll);
+  this.textContent = playAll ? "⏸ 停止連續" : "▶ 連續播放";
+  if (playAll && (cur < 0 || !playing)) {
+    const n = neighbour(1) >= 0 ? neighbour(1) : visibleIdxs()[0];
+    if (n >= 0) play(n, false);
+  }
+};
+
+const REPEATS = [1, 3, Infinity];
+const REPEAT_LABEL = {1:"重複 ×1", 3:"重複 ×3", [Infinity]:"重複 ∞"};
+function paintRepeat() {
+  $("#repeatBtn").textContent = REPEAT_LABEL[settings.repeat] || "重複 ×1";
+  $("#repeatBtn").classList.toggle("on", settings.repeat !== 1);
+}
+$("#repeatBtn").onclick = () => {
+  const i = REPEATS.indexOf(settings.repeat);
+  settings.repeat = REPEATS[(i + 1) % REPEATS.length];
+  saveSettings(); paintRepeat();
+};
+paintRepeat();
+
+$("#speed").value = String(settings.speed);
+$("#speed").onchange = function () {
+  settings.speed = parseFloat(this.value);
+  saveSettings();
+  if (mode === "api" && player && player.setPlaybackRate)
+    try { player.setPlaybackRate(settings.speed); } catch (e) {}
+  if (mode === "tts" && cur >= 0 && playing) enginePlay(cur);
+};
+
+$("#retryApi").onclick = () => {
+  hardStop();
+  embedFrame = null;
+  mode = "api"; settings.mode = "api"; saveSettings();
+  if (typeof YT !== "undefined" && YT.Player) apiReady = true;   // script already resident
+  resetApi();
+  paintMode();
+  hideStatus();
+};
+$("#useEmbed").onclick = () => setMode("embed", "你選擇改用備援播放器。");
+$("#useTts").onclick = () => setMode("tts", "你選擇改用離線朗讀。");
+$("#openYt").onclick = e => { e.preventDefault(); openInYoutube(cur >= 0 ? cur : 0); };
+
+/* ================= keyboard ================= */
+document.addEventListener("keydown", e => {
+  if (e.target.matches("input,select,textarea")) return;
+  switch (e.key) {
+    case " ": e.preventDefault(); togglePlay(); break;
+    case "ArrowUp": e.preventDefault(); $("#prevBtn").click(); break;
+    case "ArrowDown": e.preventDefault(); $("#nextBtn").click(); break;
+    case "r": case "R": $("#replayBtn").click(); break;
+    case "Escape": stopAll(); break;
+  }
+});
+
+/* ================= boot ================= */
+paintMode();
+setDrill(settings.drill === "write" ? "write" : "read");
+if (settings.mode === "embed") enterEmbed("");
+else if (settings.mode === "tts") enterTts("");
+else loadApi();
+</script>
+</body>
+</html>
